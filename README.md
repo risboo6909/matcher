@@ -22,7 +22,9 @@
 
 ### как использовать
 
+```
 cargo bench -- запустить бенчмарк criterion
 cat test.csv | ./matcher -- обработать файл с входными данными в формате csv
+```
 
 файл с входными данными должен быть в формате csv, см. https://github.com/risboo6909/matcher/blob/master/test.csv в качестве примера.
