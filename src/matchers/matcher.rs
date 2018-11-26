@@ -110,12 +110,11 @@ impl Matcher {
 
                     restore_from.push(q_order.clone());
 
-                    if !is_compatible(&q_order, &order) {
-                        continue;
-                    }
-
                     // if selling is more equal or less expensive than buy, we accept that order
                     if q_order.price_limit <= order.price_limit {
+                        if !is_compatible(&q_order, &order) {
+                            continue;
+                        }
                         process_orders(&mut q_order, &mut order);
                     } else {
                         break;
@@ -147,12 +146,11 @@ impl Matcher {
 
                     restore_from.push(q_order.clone());
 
-                    if !is_compatible(&q_order, &order) {
-                        continue;
-                    }
-
                     // if buying is equal or more expensive than selling, we accept that order
                     if q_order.price_limit >= order.price_limit {
+                        if !is_compatible(&q_order, &order) {
+                            continue;
+                        }
                         process_orders(&mut q_order, &mut order);
                     } else {
                         break;
@@ -208,12 +206,11 @@ impl Matcher {
 
                     restore_from.push(q_order.clone());
 
-                    if !is_compatible(&q_order, &order) {
-                        continue;
-                    }
-
                     // if selling is more equal or less expensive than buy, we accept that order
                     if q_order.price_limit <= order.price_limit {
+                        if !is_compatible(&q_order, &order) {
+                            continue;
+                        }
                         process_orders(&mut q_order, &mut order);
                     } else {
                         break;
@@ -243,12 +240,11 @@ impl Matcher {
 
                     restore_from.push(q_order.clone());
 
-                    if !is_compatible(&q_order, &order) {
-                        continue;
-                    }
-
                     // if buying is equal or more expensive than selling, we accept that order
                     if q_order.price_limit >= order.price_limit {
+                        if !is_compatible(&q_order, &order) {
+                            continue;
+                        }
                         process_orders(&mut q_order, &mut order);
                     } else {
                         break;
@@ -295,12 +291,11 @@ impl Matcher {
                 while !self.sell_q.is_empty() && !order.order_done() {
                     let mut q_order = self.sell_q.pop_front().unwrap();
 
-                    if !is_compatible(&q_order, &order) {
-                        continue;
-                    }
-
                     // if selling is more equal or less expensive than buy, we accept that order
                     if q_order.price_limit <= order.price_limit {
+                        if !is_compatible(&q_order, &order) {
+                            continue;
+                        }
                         process_orders(&mut q_order, &mut order);
                         // any part of order is enough to treat it as done
                         is_order_done = true;
@@ -321,12 +316,11 @@ impl Matcher {
                 while !self.buy_q.is_empty() && !order.order_done() {
                     let mut q_order = self.buy_q.pop_front().unwrap();
 
-                    if !is_compatible(&q_order, &order) {
-                        continue;
-                    }
-
                     // if buying is equal or more expensive than selling, we accept that order
                     if q_order.price_limit >= order.price_limit {
+                        if !is_compatible(&q_order, &order) {
+                            continue;
+                        }
                         process_orders(&mut q_order, &mut order);
                         // any part of order is enough to treat it as done
                         is_order_done = true;
