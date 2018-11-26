@@ -1,15 +1,13 @@
-extern crate matcher;
 extern crate csv;
+extern crate matcher;
 
 use matcher::{Matcher, Order, OrderType, Side};
 use std::io;
 
-
 fn main() {
-    
     let mut rdr = csv::ReaderBuilder::new()
-                                     .delimiter(b' ')
-                                     .from_reader(io::stdin());
+        .delimiter(b' ')
+        .from_reader(io::stdin());
 
     let mut matcher = Matcher::new(true);
 
@@ -17,5 +15,4 @@ fn main() {
         let record = result.unwrap();
         matcher.new_order_deserialize(record);
     }
-
 }

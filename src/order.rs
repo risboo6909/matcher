@@ -3,14 +3,14 @@ use std::cmp::Ordering;
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Side {
     Buy,
-    Sell
+    Sell,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum OrderType {
     Limit,
     FillOrKill,
-    ImmediateOrCancel
+    ImmediateOrCancel,
 }
 
 #[derive(Debug, Eq, Clone, Copy)]
@@ -19,7 +19,7 @@ pub struct Order {
     pub price_limit: u64,
     pub quantity: u64,
     pub user_id: u64,
-    pub order_type: OrderType
+    pub order_type: OrderType,
 }
 
 impl Order {

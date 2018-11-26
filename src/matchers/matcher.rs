@@ -1,11 +1,10 @@
-extern crate min_max_heap;
 extern crate csv;
+extern crate min_max_heap;
 
+use self::csv::StringRecord;
+use self::min_max_heap::MinMaxHeap;
 use order::{Order, OrderType, Side};
 use std::cmp::min;
-use self::min_max_heap::MinMaxHeap;
-use self::csv::StringRecord;
-
 
 pub struct Matcher {
     verbose: bool,
@@ -15,8 +14,8 @@ pub struct Matcher {
 }
 
 #[inline]
-fn is_compatible(order1: &Order, order2: &Order) -> bool {    
-    order1.user_id != order2.user_id    
+fn is_compatible(order1: &Order, order2: &Order) -> bool {
+    order1.user_id != order2.user_id
 }
 
 #[inline]
@@ -34,7 +33,6 @@ fn process_orders(order1: &mut Order, order2: &mut Order) {
 }
 
 impl Matcher {
-
     pub fn new(verbose: bool) -> Self {
         Matcher {
             verbose: verbose,
@@ -44,7 +42,6 @@ impl Matcher {
     }
 
     pub fn new_order_deserialize(&mut self, record: StringRecord) -> Order {
-
         // ugly, but I hadn't enough time to make it look better
 
         let (side, price_limit, quantity, user_id, order_type);
@@ -58,7 +55,7 @@ impl Matcher {
         price_limit = record.get(1).unwrap().parse::<u64>().unwrap();
         quantity = record.get(2).unwrap().parse::<u64>().unwrap();
         user_id = record.get(3).unwrap().parse::<u64>().unwrap();
-        
+
         let tmp = record.get(4).unwrap().to_lowercase();
 
         if tmp == "limit" {
@@ -69,8 +66,13 @@ impl Matcher {
             order_type = OrderType::ImmediateOrCancel;
         }
 
-        self.new_order(Order{side, price_limit, quantity, user_id, order_type})
-
+        self.new_order(Order {
+            side,
+            price_limit,
+            quantity,
+            user_id,
+            order_type,
+        })
     }
 
     pub fn new_order(&mut self, order: Order) -> Order {
@@ -89,17 +91,14 @@ impl Matcher {
         let suffix;
 
         match order.side {
-
             Side::Buy => {
-
                 suffix = "bought";
 
                 while !self.sell_q.is_empty() {
-                    
                     let mut q_order = self.sell_q.pop_min().unwrap();
-                    
+
                     restore_from.push(q_order.clone());
-             
+
                     if !is_compatible(&q_order, &order) {
                         continue;
                     }
@@ -120,7 +119,6 @@ impl Matcher {
                         is_order_done = true;
                         break;
                     }
-
                 }
 
                 if !is_order_done {
@@ -128,18 +126,16 @@ impl Matcher {
                     // put the rest of user's order into queue
                     self.buy_q.push(order);
                 }
-            },
-   
-            Side::Sell => {
+            }
 
+            Side::Sell => {
                 suffix = "sold";
 
                 while !self.buy_q.is_empty() {
-
                     let mut q_order = self.buy_q.pop_max().unwrap();
-                    
+
                     restore_from.push(q_order.clone());
-             
+
                     if !is_compatible(&q_order, &order) {
                         continue;
                     }
@@ -150,7 +146,7 @@ impl Matcher {
                     } else {
                         break;
                     }
-           
+
                     if order.order_done() {
                         // if current order is totally satisfied -- end the loop
                         if !q_order.order_done() {
@@ -158,29 +154,31 @@ impl Matcher {
                             self.buy_q.push(q_order.clone());
                         }
                         is_order_done = true;
-                        break;    
+                        break;
                     }
-
                 }
                 if !is_order_done {
                     restore_heap(&mut self.buy_q, restore_from);
                     // put the rest of user's order into queue
                     self.sell_q.push(order);
                 }
-            },
-
+            }
         }
 
         if self.verbose {
             if is_order_done {
                 println!("{:?} done", order_copy);
             } else {
-                println!("{:?} put into queue, {} {}", order, order_copy.quantity - order.quantity, suffix);
+                println!(
+                    "{:?} put into queue, {} {}",
+                    order,
+                    order_copy.quantity - order.quantity,
+                    suffix
+                );
             }
         }
 
         order
-
     }
 
     fn process_fill_or_kill(&mut self, mut order: Order) -> Order {
@@ -191,17 +189,14 @@ impl Matcher {
         let suffix;
 
         match order.side {
-
             Side::Buy => {
-
                 suffix = "bought";
 
                 while !self.sell_q.is_empty() {
-                    
                     let mut q_order = self.sell_q.pop_min().unwrap();
-                    
+
                     restore_from.push(q_order.clone());
-             
+
                     if !is_compatible(&q_order, &order) {
                         continue;
                     }
@@ -222,24 +217,21 @@ impl Matcher {
                         is_order_done = true;
                         break;
                     }
-
                 }
 
                 if !is_order_done {
                     restore_heap(&mut self.sell_q, restore_from);
                 }
-            },
-   
-            Side::Sell => {
+            }
 
+            Side::Sell => {
                 suffix = "sold";
 
                 while !self.buy_q.is_empty() {
-
                     let mut q_order = self.buy_q.pop_max().unwrap();
-                    
+
                     restore_from.push(q_order.clone());
-             
+
                     if !is_compatible(&q_order, &order) {
                         continue;
                     }
@@ -250,7 +242,7 @@ impl Matcher {
                     } else {
                         break;
                     }
-           
+
                     if order.order_done() {
                         // if current order is totally satisfied -- end the loop
                         if !q_order.order_done() {
@@ -258,15 +250,13 @@ impl Matcher {
                             self.buy_q.push(q_order.clone());
                         }
                         is_order_done = true;
-                        break;    
+                        break;
                     }
-
                 }
                 if !is_order_done {
                     restore_heap(&mut self.buy_q, restore_from);
                 }
-            },
-
+            }
         }
 
         if self.verbose {
@@ -278,11 +268,9 @@ impl Matcher {
         }
 
         order
-
     }
 
     fn process_immediate_or_cancel(&mut self, mut order: Order) -> Order {
-        
         let mut restore_from = Vec::new();
         let mut is_order_done = false;
 
@@ -290,15 +278,12 @@ impl Matcher {
         let suffix;
 
         match order.side {
-
             Side::Buy => {
-
                 suffix = "bought";
 
                 while !self.sell_q.is_empty() && !order.order_done() {
-                    
                     let mut q_order = self.sell_q.pop_min().unwrap();
-                    
+
                     if !is_compatible(&q_order, &order) {
                         continue;
                     }
@@ -308,27 +293,23 @@ impl Matcher {
                         process_orders(&mut q_order, &mut order);
                         // any part of order is enough to treat it as done
                         is_order_done = true;
-
                     } else {
                         if !q_order.order_done() {
                             restore_from.push(q_order.clone());
                         }
                         break;
                     }
-
                 }
 
                 restore_heap(&mut self.sell_q, restore_from);
-            },
-   
-            Side::Sell => {
+            }
 
+            Side::Sell => {
                 suffix = "sold";
 
                 while !self.buy_q.is_empty() && !order.order_done() {
-
                     let mut q_order = self.buy_q.pop_max().unwrap();
-                    
+
                     if !is_compatible(&q_order, &order) {
                         continue;
                     }
@@ -338,31 +319,32 @@ impl Matcher {
                         process_orders(&mut q_order, &mut order);
                         // any part of order is enough to treat it as done
                         is_order_done = true;
-
                     } else {
                         if !q_order.order_done() {
                             restore_from.push(q_order.clone());
                         }
                         break;
                     }
-
                 }
 
                 restore_heap(&mut self.buy_q, restore_from);
-            },
-
+            }
         }
 
         if self.verbose {
             if is_order_done {
-                println!("{:?}, {} {}, {} ignored", order_copy, order_copy.quantity - order.quantity, suffix, order.quantity);
+                println!(
+                    "{:?}, {} {}, {} ignored",
+                    order_copy,
+                    order_copy.quantity - order.quantity,
+                    suffix,
+                    order.quantity
+                );
             } else {
                 println!("{:?} cancelled", order_copy);
             }
         }
 
         order
-
     }
-
 }
