@@ -1,16 +1,17 @@
 extern crate csv;
-extern crate min_max_heap;
+extern crate skiplist;
 
 use self::csv::StringRecord;
-use self::min_max_heap::MinMaxHeap;
+use self::skiplist::OrderedSkipList;
 use order::{Order, OrderType, Side};
 use std::cmp::min;
+use std::cmp::Ordering;
 
 pub struct Matcher {
     verbose: bool,
     // left them public for easier testing
-    pub buy_q: MinMaxHeap<Order>,
-    pub sell_q: MinMaxHeap<Order>,
+    pub buy_q: OrderedSkipList<Order>,
+    pub sell_q: OrderedSkipList<Order>,
 }
 
 #[inline]
@@ -19,9 +20,9 @@ fn is_compatible(order1: &Order, order2: &Order) -> bool {
 }
 
 #[inline]
-fn restore_heap(restore_into: &mut MinMaxHeap<Order>, restore_from: Vec<Order>) {
+fn restore_heap(restore_into: &mut OrderedSkipList<Order>, restore_from: Vec<Order>) {
     for order in restore_from {
-        restore_into.push(order);
+        restore_into.insert(order);
     }
 }
 
@@ -36,8 +37,18 @@ impl Matcher {
     pub fn new(verbose: bool) -> Self {
         Matcher {
             verbose: verbose,
-            buy_q: MinMaxHeap::new(),
-            sell_q: MinMaxHeap::new(),
+            buy_q: unsafe {
+                OrderedSkipList::with_comp(|order1: &Order, order2: &Order| {
+                    if order1.price_limit > order2.price_limit {
+                        Ordering::Less
+                    } else if order1.price_limit < order2.price_limit {
+                        Ordering::Greater
+                    } else {
+                        Ordering::Equal
+                    }
+                })
+            },
+            sell_q: OrderedSkipList::new(),
         }
     }
 
@@ -95,7 +106,7 @@ impl Matcher {
                 suffix = "bought";
 
                 while !self.sell_q.is_empty() {
-                    let mut q_order = self.sell_q.pop_min().unwrap();
+                    let mut q_order = self.sell_q.pop_front().unwrap();
 
                     restore_from.push(q_order.clone());
 
@@ -114,7 +125,7 @@ impl Matcher {
                         // if current order is totally satisfied -- end the loop
                         if !q_order.order_done() {
                             // push the last unfinished order
-                            self.sell_q.push(q_order.clone());
+                            self.sell_q.insert(q_order.clone());
                         }
                         is_order_done = true;
                         break;
@@ -124,7 +135,7 @@ impl Matcher {
                 if !is_order_done {
                     restore_heap(&mut self.sell_q, restore_from);
                     // put the rest of user's order into queue
-                    self.buy_q.push(order);
+                    self.buy_q.insert(order);
                 }
             }
 
@@ -132,7 +143,7 @@ impl Matcher {
                 suffix = "sold";
 
                 while !self.buy_q.is_empty() {
-                    let mut q_order = self.buy_q.pop_max().unwrap();
+                    let mut q_order = self.buy_q.pop_front().unwrap();
 
                     restore_from.push(q_order.clone());
 
@@ -151,7 +162,7 @@ impl Matcher {
                         // if current order is totally satisfied -- end the loop
                         if !q_order.order_done() {
                             // push the last unfinished order
-                            self.buy_q.push(q_order.clone());
+                            self.buy_q.insert(q_order.clone());
                         }
                         is_order_done = true;
                         break;
@@ -160,7 +171,7 @@ impl Matcher {
                 if !is_order_done {
                     restore_heap(&mut self.buy_q, restore_from);
                     // put the rest of user's order into queue
-                    self.sell_q.push(order);
+                    self.sell_q.insert(order);
                 }
             }
         }
@@ -193,7 +204,7 @@ impl Matcher {
                 suffix = "bought";
 
                 while !self.sell_q.is_empty() {
-                    let mut q_order = self.sell_q.pop_min().unwrap();
+                    let mut q_order = self.sell_q.pop_front().unwrap();
 
                     restore_from.push(q_order.clone());
 
@@ -212,7 +223,7 @@ impl Matcher {
                         // if current order is totally satisfied -- end the loop
                         if !q_order.order_done() {
                             // push the last unfinished order
-                            self.sell_q.push(q_order.clone());
+                            self.sell_q.insert(q_order.clone());
                         }
                         is_order_done = true;
                         break;
@@ -228,7 +239,7 @@ impl Matcher {
                 suffix = "sold";
 
                 while !self.buy_q.is_empty() {
-                    let mut q_order = self.buy_q.pop_max().unwrap();
+                    let mut q_order = self.buy_q.pop_front().unwrap();
 
                     restore_from.push(q_order.clone());
 
@@ -247,7 +258,7 @@ impl Matcher {
                         // if current order is totally satisfied -- end the loop
                         if !q_order.order_done() {
                             // push the last unfinished order
-                            self.buy_q.push(q_order.clone());
+                            self.buy_q.insert(q_order.clone());
                         }
                         is_order_done = true;
                         break;
@@ -282,7 +293,7 @@ impl Matcher {
                 suffix = "bought";
 
                 while !self.sell_q.is_empty() && !order.order_done() {
-                    let mut q_order = self.sell_q.pop_min().unwrap();
+                    let mut q_order = self.sell_q.pop_front().unwrap();
 
                     if !is_compatible(&q_order, &order) {
                         continue;
@@ -308,7 +319,7 @@ impl Matcher {
                 suffix = "sold";
 
                 while !self.buy_q.is_empty() && !order.order_done() {
-                    let mut q_order = self.buy_q.pop_max().unwrap();
+                    let mut q_order = self.buy_q.pop_front().unwrap();
 
                     if !is_compatible(&q_order, &order) {
                         continue;

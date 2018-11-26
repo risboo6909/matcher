@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["risboo6909 <risboo6909@yandex-team.ru>"]
 
 [dependencies]
-min-max-heap = "1.2.0"
 criterion = "0.2"
 csv = "1"
+skiplist = "0.2.10"
 
 [lib]
 name = "matcher"

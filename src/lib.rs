@@ -68,7 +68,7 @@ fn test_1() {
 
     // check if partial order is in queue
     assert_eq!(
-        *matcher.buy_q.peek_min().unwrap(),
+        *matcher.buy_q.front().unwrap(),
         Order {
             side: Side::Buy,
             price_limit: 13,
@@ -118,7 +118,7 @@ fn test_1() {
         }
     );
     assert_eq!(
-        *matcher.buy_q.peek_min().unwrap(),
+        *matcher.buy_q.front().unwrap(),
         Order {
             side: Side::Buy,
             price_limit: 13,
@@ -138,7 +138,7 @@ fn test_1() {
 
     // this whole order must be discarded
     assert_eq!(
-        *matcher.buy_q.peek_min().unwrap(),
+        *matcher.buy_q.front().unwrap(),
         Order {
             side: Side::Buy,
             price_limit: 13,
@@ -351,7 +351,7 @@ fn test_2() {
 
     // ensure two previous orders were queued
     assert_eq!(
-        matcher.buy_q.pop_min().unwrap(),
+        matcher.buy_q.pop_front().unwrap(),
         Order {
             side: Side::Buy,
             price_limit: 11,
@@ -361,7 +361,7 @@ fn test_2() {
         }
     );
     assert_eq!(
-        matcher.buy_q.pop_min().unwrap(),
+        matcher.buy_q.pop_front().unwrap(),
         Order {
             side: Side::Buy,
             price_limit: 11,

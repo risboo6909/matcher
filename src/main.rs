@@ -1,7 +1,8 @@
 extern crate csv;
 extern crate matcher;
+extern crate skiplist;
 
-use matcher::{Matcher, Order, OrderType, Side};
+use matcher::Matcher;
 use std::io;
 
 fn main() {
