@@ -23,7 +23,7 @@ fn benchmark(c: &mut Criterion) {
                         Side::Sell,
                         rand_range(5, 10),
                         rand_range(1, 10),
-                        rand_range(1, 13),
+                        rand_range(9, 13),
                         OrderType::Limit,
                     );
                 }
