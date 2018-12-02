@@ -1,12 +1,16 @@
 [package]
 name = "matcher"
 version = "0.1.0"
+edition = "2018"
 authors = ["risboo6909 <risboo6909@yandex-team.ru>"]
 
 [dependencies]
 criterion = "0.2"
 csv = "1"
+serde = "1"
+serde_derive = "1"
 skiplist = "0.2.10"
+rand = "0.6.1"
 
 [lib]
 name = "matcher"

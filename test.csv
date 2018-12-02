@@ -1,5 +1,12 @@
 Side PriceLimit Quantity UserId OrderType
-Sell 11 6 12 Limit
-Sell 12 4 123 Limit
-Buy 13 5 12 Limit
-Buy 11 8 15 ImmediateOrCancel
+Buy 2 2 6 Limit
+Sell 1 10 7 FillOrKill
+Sell 1 2 8 FillOrKill
+Buy 2 10 9 Limit
+Sell 1 9 7 FillOrKill
+Sell 1 2 20 Limit
+Sell 10 20 21 Limit
+Buy 20 25 22 ImmediateOrCancel
+Sell 10 20 23 Limit
+Buy 20 30 24 FillOrKill
+Buy 20 30 24 ImmediateOrCancel

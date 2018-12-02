@@ -1,19 +1,28 @@
-extern crate csv;
-extern crate matcher;
-extern crate skiplist;
+use matcher;
+use csv;
 
-use matcher::Matcher;
+use self::matcher::{Matcher, Order};
 use std::io;
+use std::error::Error;
 
-fn main() {
+
+fn parse_file(matcher: &mut Matcher) -> Result<(), Box<dyn Error>> {
+
     let mut rdr = csv::ReaderBuilder::new()
         .delimiter(b' ')
         .from_reader(io::stdin());
 
-    let mut matcher = Matcher::new(true);
-
-    for result in rdr.records() {
-        let record = result.unwrap();
-        matcher.new_order_deserialize(record);
+    for result in rdr.deserialize() {
+        let mut order: Order = result?;
+        order.start_quantity = order.quantity;
+        matcher.new_order_object(order);
     }
+
+    Ok(())
+
+}
+
+fn main() {
+    let mut matcher = Matcher::new(true);
+    parse_file(&mut matcher).unwrap();
 }
