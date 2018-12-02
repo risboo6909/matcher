@@ -113,3 +113,17 @@ fn test_2() {
         Order::new(Side::Buy, 11, 201, 12, OrderType::Limit)
     );
 }
+
+#[test]
+fn test_3() {
+    let mut matcher = Matcher::new(false);
+    matcher.new_order(Side::Sell, 10, 20, 23, OrderType::Limit);
+    // FillOrKill must be ignored 30 items requested, only 20 available
+    let order = matcher.new_order(Side::Buy, 20, 30, 24, OrderType::FillOrKill);
+    assert_eq!(order.quantity, 30);
+    // ImmediateOrCancel may be partially done
+    let order = matcher.new_order(Side::Buy, 20, 30, 25, OrderType::ImmediateOrCancel);
+    assert_eq!(order.quantity, 10);
+    // no orders should left in sell queue
+    assert_eq!(matcher.sell_q.borrow().len(), 0);
+}

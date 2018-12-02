@@ -155,7 +155,7 @@ impl Matcher {
 
                 if tmp_cur_order.transaction_done() {
                     q.borrow_mut().remove_index(&idx);
-                    if !q_order.quantity != 0 {
+                    if tmp_q_order.quantity != 0 {
                         q.borrow_mut().insert(tmp_q_order);
                     }
                     order = tmp_cur_order;
